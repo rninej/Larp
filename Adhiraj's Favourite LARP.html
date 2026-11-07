@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adhiraj's Favourite LARP - Football Knowledge Hub</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif']
+                    },
+                    colors: {
+                        pitch: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            900: '#14532d',
+                            950: '#052e16'
+                        },
+                        stadium: '#0f172a'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <!-- Header Navigation -->
+    <header class="bg-slate-900/80 backdrop-blur border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-gradient-to-tr from-emerald-500 to-green-400 p-2.5 rounded-xl shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid font-bold fa-futbol text-slate-950 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-black text-xl tracking-tight text-white flex items-center gap-2">
+                        ADHIRAJ'S FAVOURITE LARP
+                        <span class="text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">Pro Edition</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Master football trivia, banter, & tactics to blend in instantly</p>
+                </div>
+            </div>
+            <!-- Dynamic XP Badge -->
+            <div class="flex items-center gap-4">
+                <div class="hidden sm:flex items-center gap-2 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-lg">
+                    <i class="fa-solid fa-trophy text-amber-400"></i>
+                    <span class="text-xs font-semibold text-slate-300">IQ Rating:</span>
+                    <span id="user-xp" class="text-sm font-bold text-emerald-400">1,250 IQ</span>
+                </div>
+                <button onclick="toggleSound()" class="p-2 text-slate-400 hover:text-white transition">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main App Layout -->
+    <div class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full flex flex-col md:flex-row gap-6">
+
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 flex-shrink-0 space-y-2">
+            <nav id="nav-menu" class="bg-slate-900 border border-slate-800 rounded-2xl p-2 space-y-1">
+                <button onclick="switchTab('flashcards')" class="nav-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium transition text-white bg-emerald-600">
+                    <i class="fa-solid fa-layer-group text-lg"></i> Player Flashcards
+                </button>
+                <button onclick="switchTab('iconic-matches')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+                    <i class="fa-solid fa-video text-lg"></i> Iconic Matches
+                </button>
+                <button onclick="switchTab('recent-news')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+                    <i class="fa-solid fa-newspaper text-lg"></i> Recent & Trending
+                </button>
+                <button onclick="switchTab('banter-guide')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+                    <i class="fa-solid fa-comments text-lg"></i> Cheat Codes & Banter
+                </button>
+                <button onclick="switchTab('quiz')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+                    <i class="fa-solid fa-circle-question text-lg"></i> Speed Quiz
+                </button>
+            </nav>
+
+            <!-- Quick Phrase Generator Widget -->
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/20 rounded-2xl p-4 space-y-3">
+                <div class="flex items-center gap-2 text-emerald-400 font-heading font-bold text-sm">
+                    <i class="fa-solid fa-bolt"></i> Instant Football Hot-Take
+                </div>
+                <p id="phrase-display" class="text-xs text-slate-300 italic min-h-[40px] flex items-center">
+                    "Honestly, his off-the-ball movement is so underrated."
+                </p>
+                <button onclick="generatePhrase()" class="w-full bg-slate-800 hover:bg-slate-700 text-xs font-semibold py-2 px-3 rounded-lg border border-slate-700 text-slate-200 transition">
+                    Generate New Take
+                </button>
+            </div>
+        </aside>
+
+        <!-- Dynamic Content Area -->
+        <main class="flex-1 min-w-0">
+            
+            <!-- SECTION 1: PLAYER FLASHCARDS -->
+            <section id="tab-flashcards" class="tab-content space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                    <div>
+                        <h2 class="font-heading font-bold text-2xl text-white">Player Mastery Deck</h2>
+                        <p class="text-sm text-slate-400">Click a card to flip and learn key stats, slang, and narrative points.</p>
+                    </div>
+                    <!-- Position Filter -->
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-slate-400 font-semibold uppercase">Filter:</span>
+                        <select id="card-filter" onchange="renderFlashcards()" class="bg-slate-800 border border-slate-700 rounded-lg text-xs px-3 py-2 text-slate-200 focus:outline-none focus:border-emerald-500">
+                            <option value="ALL">All Players</option>
+                            <option value="GOAT">Goats & Legends</option>
+                            <option value="ATTACKER">Forwards & Strikers</option>
+                            <option value="MIDFIELD">Midfield Maestros</option>
+                            <option value="DEFENSE">Defenders & GKs</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cards Grid -->
+                <div id="flashcard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards dynamically populated via JS -->
+                </div>
+            </section>
+
+            <!-- SECTION 2: ICONIC MATCHES -->
+            <section id="tab-iconic-matches" class="tab-content hidden space-y-6">
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-2xl text-white">Legendary Matches You Must Know</h2>
+                    <p class="text-sm text-slate-400">Reference these classic matches in conversations to immediately sound like an expert.</p>
+                </div>
+
+                <div id="matches-list" class="space-y-4">
+                    <!-- Matches rendered via JS -->
+                </div>
+            </section>
+
+            <!-- SECTION 3: RECENT & TRENDING -->
+            <section id="tab-recent-news" class="tab-content hidden space-y-6">
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-2xl text-white">Current Headlines & Modern Meta</h2>
+                    <p class="text-sm text-slate-400">Stay up to date with the latest football narratives to talk about current games.</p>
+                </div>
+
+                <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- News items rendered via JS -->
+                </div>
+            </section>
+
+            <!-- SECTION 4: BANTER & CHEAT CODES -->
+            <section id="tab-banter-guide" class="tab-content hidden space-y-6">
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                    <h2 class="font-heading font-bold text-2xl text-white">Banter Cheat Sheet & Lexicon</h2>
+                    <p class="text-sm text-slate-400">Key football slang, phrases, and tactical buzzwords to sound genuine.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Terms Glossary -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+                        <h3 class="font-heading font-bold text-lg text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-book"></i> Essential Football Vocab
+                        </h3>
+                        <div id="vocab-container" class="space-y-3">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Conversation Survival Tactics -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+                        <h3 class="font-heading font-bold text-lg text-emerald-400 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved"></i> How to Survive Football Chats
+                        </h3>
+                        <div class="space-y-3 text-sm text-slate-300">
+                            <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                                <span class="font-semibold text-emerald-400 block mb-1">Rule 1: Always praise prime midfield play</span>
+                                <p class="text-xs text-slate-400">If you're unsure who performed best, say: <em>"The way they controlled the tempo in the midfield was quiet brilliance."</em></p>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                                <span class="font-semibold text-emerald-400 block mb-1">Rule 2: Blame the VAR (Video Assistant Referee)</span>
+                                <p class="text-xs text-slate-400">If a match ended in controversy, say: <em>"VAR is ruining the flow of the modern game, honestly."</em></p>
+                            </div>
+                            <div class="bg-slate-800/50 p-3 rounded-xl border border-slate-700/50">
+                                <span class="font-semibold text-emerald-400 block mb-1">Rule 3: Respect legacy, question form</span>
+                                <p class="text-xs text-slate-400">To sound nuanced: <em>"He's a world-class player on his day, but his current form just isn't cutting it."</em></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: SPEED QUIZ -->
+            <section id="tab-quiz" class="tab-content hidden space-y-6">
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 flex justify-between items-center">
+                    <div>
+                        <h2 class="font-heading font-bold text-2xl text-white">LARP Survival Quiz</h2>
+                        <p class="text-sm text-slate-400">Test your football knowledge and raise your IQ rating.</p>
+                    </div>
+                    <div id="quiz-score" class="text-right">
+                        <span class="text-xs text-slate-400 uppercase font-semibold">Streak</span>
+                        <div class="text-2xl font-black text-emerald-400" id="quiz-streak font-heading">0 🔥</div>
+                    </div>
+                </div>
+
+                <div id="quiz-container" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 space-y-6 text-center">
+                    <!-- Dynamic Quiz Content -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Script for Logic and Data -->
+    <script>
+        // Data Arrays
+        const playersData = [
+            {
+                name: "Lionel Messi",
+                nickname: "LM10 / La Pulga",
+                club: "Inter Miami (ex-Barcelona)",
+                role: "GOAT / Playmaker",
+                tag: "GOAT",
+                vibe: "Natural magician, infinite vision, calm finisher.",
+                keyFact: "Won the 2022 World Cup with Argentina and 8 Ballon d'Ors.",
+                slang: "Say: 'His low center of gravity makes him un-tacklable.'"
+            },
+            {
+                name: "Cristiano Ronaldo",
+                nickname: "CR7",
+                club: "Al-Nassr (ex-Real Madrid)",
+                role: "GOAT / Goal Machine",
+                tag: "GOAT",
+                vibe: "Relentless work ethic, lethal aerial threat, clutch striker.",
+                keyFact: "All-time top official goalscorer in professional football history.",
+                slang: "Say: 'His mentality and movement inside the box are elite.'"
+            },
+            {
+                name: "Kylian Mbappé",
+                nickname: "Donatello / KM9",
+                club: "Real Madrid",
+                role: "Forward / Speedster",
+                tag: "ATTACKER",
+                vibe: "Explosive pace, sharp stepovers, devastating on the counter.",
+                keyFact: "Scored a hat-trick in the 2022 World Cup Final.",
+                slang: "Say: 'Once he gets into space, defender's can't catch him.'"
+            },
+            {
+                name: "Jude Bellingham",
+                nickname: "Hey Jude",
+                club: "Real Madrid",
+                role: "Box-to-Box Midfielder",
+                tag: "MIDFIELD",
+                vibe: "Composed, mature, clutch late runs into the box.",
+                keyFact: "Star player for England and Golden Boy award winner.",
+                slang: "Say: 'Plays with the maturity of a 35-year-old veteran.'"
+            },
+            {
+                name: "Erling Haaland",
+                nickname: "The Cyborg",
+                club: "Manchester City",
+                role: "Striker",
+                tag: "ATTACKER",
+                vibe: "Pure physical power, ruthless positioning, incredible finishing.",
+                keyFact: "Broke the Premier League single-season scoring record in his debut year.",
+                slang: "Say: 'He doesn't need touch build-up, just feed him in the 6-yard box.'"
+            },
+            {
+                name: "Kevin De Bruyne",
+                nickname: "KDB",
+                club: "Manchester City",
+                role: "Midfield Maestro",
+                tag: "MIDFIELD",
+                vibe: "Master of cross passes, pin-point vision, rocket long shots.",
+                keyFact: " Widely regarded as one of the best passers in football history.",
+                slang: "Say: 'He sees passing angles that don't even exist on TV.'"
+            },
+            {
+                name: "Virgil van Dijk",
+                nickname: "VVD",
+                club: "Liverpool",
+                role: "Center Back",
+                tag: "DEFENSE",
+                vibe: "Calm, dominant, never gets flustered, aerial force.",
+                keyFact: "Led Liverpool to Premier League & Champions League titles.",
+                slang: "Say: 'He controls the backline just with his presence.'"
+            }
+        ];
+
+        const iconicMatches = [
+            {
+                title: "The 2022 World Cup Final",
+                teams: "Argentina 3 - 3 France (Argentina won 4-2 on pens)",
+                date: "Dec 2022",
+                summary: "Widely regarded as the greatest football match ever. Messi vs Mbappé faceoff. Drama, extra-time goals, and penalty shootout glory.",
+                takeaway: "Use this to argue why Messi cemented his GOAT status."
+            },
+            {
+                title: "The Miracle of Istanbul",
+                teams: "AC Milan 3 - 3 Liverpool (Liverpool won on pens)",
+                date: "May 2005 - Champions League Final",
+                summary: "AC Milan were 3-0 up at half time. Liverpool made an impossible comeback to win the trophy.",
+                takeaway: "Use this when talking about how 'football is a game of two halves'."
+            },
+            {
+                title: "Barcelona 6 - 1 PSG ('La Remontada')",
+                teams: "Barcelona vs PSG",
+                date: "March 2017",
+                summary: "Barcelona lost the 1st leg 4-0, then scored 3 goals after the 88th minute to win 6-5 on aggregate.",
+                takeaway: "The phrase 'La Remontada' means ultimate comeback because of this match."
+            }
+        ];
+
+        const newsItems = [
+            {
+                headline: "Tactical Trend: Inverted Full-Backs",
+                category: "Tactics",
+                summary: "Coaches like Pep Guardiola now have defenders move into central midfield when attacking to overload the center.",
+                smartComment: "Say: 'I really like how teams invert their full-backs to create mid-field overloads now.'"
+            },
+            {
+                headline: "The Rise of Saudi Pro League",
+                category: "Global Game",
+                summary: "Top European stars (Ronaldo, Neymar, Benzema) moving to Saudi clubs for record deals.",
+                smartComment: "Say: 'It's crazy how quickly the global transfer market shifted money-wise.'"
+            },
+            {
+                headline: "High-Pressing Defensive Blocks",
+                category: "Modern Style",
+                summary: "Teams press aggressively high up the pitch instead of sitting back defensively.",
+                smartComment: "Say: 'If your press isn't synchronized, good teams break right through you.'"
+            }
+        ];
+
+        const hotTakes = [
+            "Honestly, his off-the-ball movement is what creates all their space.",
+            "He's a great individual player, but does he really work hard in high-pressing system?",
+            "At the end of the day, control in the midfield dictates who wins big matches.",
+            "VAR takes away the raw emotion of celebrating a goal, to be honest.",
+            "Prime Luka Modrić made the hardest passes look completely effortless.",
+            "People judge strikers only on goals, but link-up play is just as crucial."
+        ];
+
+        const vocabList = [
+            { term: "Gegenpressing", def: "Counter-pressing immediately after losing possession to regain the ball high up." },
+            { term: "Park the Bus", def: "Playing ultra-defensively by putting almost all players behind the ball." },
+            { term: "Clean Sheet", def: "When a team/goalkeeper keeps the opponent from scoring any goals (e.g., 0 goals conceded)." },
+            { term: "Tiki-Taka", def: "Style of play based on short passing, movement, and maintaining possession (famous via Barcelona)." },
+            { term: "Banger", def: "An extraordinary long-range goal or spectacular volley." }
+        ];
+
+        const quizQuestions = [
+            {
+                q: "Which nation won the 2022 FIFA World Cup in Qatar?",
+                options: ["France", "Argentina", "Brazil", "England"],
+                ans: 1
+            },
+            {
+                q: "What does 'Keeping a Clean Sheet' mean?",
+                options: ["Washing uniforms", "Scoring 3+ goals", "Not conceding any goals", "Winning on penalties"],
+                ans: 2
+            },
+            {
+                q: "Who is nicknamed 'The Cyborg' for his prolific goal scoring?",
+                options: ["Erling Haaland", "Kylian Mbappé", "Cristiano Ronaldo", "Harry Kane"],
+                ans: 0
+            },
+            {
+                q: "Which player has won the most Ballon d'Or awards in history?",
+                options: ["Cristiano Ronaldo", "Zinedine Zidane", "Pele", "Lionel Messi"],
+                ans: 3
+            }
+        ];
+
+        // App State
+        let currentQuizIndex = 0;
+        let streak = 0;
+        let soundEnabled = true;
+
+        // Init Function
+        window.onload = function() {
+            renderFlashcards();
+            renderMatches();
+            renderNews();
+            renderVocab();
+            renderQuiz();
+        };
+
+        // Navigation Tabs Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            
+            // Highlight button
+            const activeBtn = event.currentTarget;
+            if(activeBtn) {
+                activeBtn.classList.add('bg-emerald-600', 'text-white');
+                activeBtn.classList.remove('text-slate-400');
+            }
+        }
+
+        // Render Flashcards
+        function renderFlashcards() {
+            const container = document.getElementById('flashcard-grid');
+            const filter = document.getElementById('card-filter').value;
+            container.innerHTML = '';
+
+            const filtered = filter === 'ALL' ? playersData : playersData.filter(p => p.tag === filter);
+
+            filtered.forEach(player => {
+                const cardHTML = `
+                    <div class="card-flip h-80 cursor-pointer" onclick="this.classList.toggle('flipped')">
+                        <div class="card-inner relative w-full h-full duration-500 rounded-2xl">
+                            <!-- FRONT -->
+                            <div class="card-front absolute w-full h-full bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                                <div>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span class="text-xs font-bold px-2 py-1 bg-slate-800 text-emerald-400 rounded-md border border-slate-700">${player.tag}</span>
+                                        <i class="fa-solid fa-rotate text-slate-500 text-xs"></i>
+                                    </div>
+                                    <h3 class="font-heading font-extrabold text-xl text-white mb-1">${player.name}</h3>
+                                    <p class="text-xs text-emerald-400 font-semibold mb-3">${player.nickname}</p>
+                                    <p class="text-xs text-slate-300"><strong>Club:</strong> ${player.club}</p>
+                                    <p class="text-xs text-slate-400 mt-2">${player.vibe}</p>
+                                </div>
+                                <div class="text-center pt-3 border-t border-slate-800/80">
+                                    <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Tap to reveal cheat facts</span>
+                                </div>
+                            </div>
+
+                            <!-- BACK -->
+                            <div class="card-back absolute w-full h-full bg-gradient-to-br from-emerald-950 to-slate-900 border border-emerald-500/40 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                                <div class="space-y-3">
+                                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Quick Talking Points</span>
+                                    <div>
+                                        <p class="text-xs text-slate-400 font-semibold">Key Achievement:</p>
+                                        <p class="text-xs text-slate-200 mt-0.5">${player.keyFact}</p>
+                                    </div>
+                                    <div class="bg-slate-900/60 p-2.5 rounded-lg border border-emerald-500/20">
+                                        <p class="text-xs text-emerald-300 font-semibold">What to say to friends:</p>
+                                        <p class="text-xs text-slate-300 italic mt-0.5">${player.slang}</p>
+                                    </div>
+                                </div>
+                                <div class="text-center pt-2">
+                                    <span class="text-xs text-emerald-400/70 font-semibold">Tap to flip back</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        // Render Matches
+        function renderMatches() {
+            const container = document.getElementById('matches-list');
+            container.innerHTML = '';
+
+            iconicMatches.forEach(match => {
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition space-y-2">
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-1">
+                            <h3 class="font-heading font-bold text-lg text-white">${match.title}</h3>
+                            <span class="text-xs px-2.5 py-1 bg-slate-800 text-slate-400 rounded-full w-fit font-medium">${match.date}</span>
+                        </div>
+                        <p class="text-xs font-bold text-emerald-400">${match.teams}</p>
+                        <p class="text-xs text-slate-300">${match.summary}</p>
+                        <div class="pt-2 flex items-center gap-2 text-xs text-amber-300 font-medium">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span>Conversation Hack: ${match.takeaway}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Render News
+        function renderNews() {
+            const container = document.getElementById('news-grid');
+            container.innerHTML = '';
+
+            newsItems.forEach(item => {
+                container.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-3">
+                        <div class="space-y-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">${item.category}</span>
+                            <h3 class="font-heading font-bold text-base text-white">${item.headline}</h3>
+                            <p class="text-xs text-slate-300">${item.summary}</p>
+                        </div>
+                        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700 text-xs text-slate-200 italic">
+                            "${item.smartComment}"
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Render Vocab
+        function renderVocab() {
+            const container = document.getElementById('vocab-container');
+            container.innerHTML = '';
+
+            vocabList.forEach(v => {
+                container.innerHTML += `
+                    <div class="border-b border-slate-800 pb-2.5 last:border-0">
+                        <span class="font-bold text-sm text-slate-200 block">${v.term}</span>
+                        <span class="text-xs text-slate-400">${v.def}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Generator for random hot takes
+        function generatePhrase() {
+            const randomIndex = Math.floor(Math.random() * hotTakes.length);
+            document.getElementById('phrase-display').innerText = `"${hotTakes[randomIndex]}"`;
+        }
+
+        // Quiz System
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            const q = quizQuestions[currentQuizIndex];
+
+            if (!q) {
+                container.innerHTML = `
+                    <div class="space-y-4 py-8">
+                        <i class="fa-solid fa-trophy text-5xl text-amber-400 animate-bounce"></i>
+                        <h3 class="font-heading font-bold text-2xl text-white">Quiz Completed!</h3>
+                        <p class="text-slate-300 text-sm">You are officially ready to banter with your football friends!</p>
+                        <button onclick="resetQuiz()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-xl transition text-sm">
+                            Restart Quiz
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase">Question ${currentQuizIndex + 1} of ${quizQuestions.length}</span>
+                    <h3 class="font-heading font-bold text-xl text-white">${q.q}</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+                        ${q.options.map((opt, idx) => `
+                            <button onclick="checkAnswer(${idx})" class="p-3 bg-slate-800 hover:bg-emerald-600 hover:text-white border border-slate-700 rounded-xl text-sm font-semibold text-slate-200 transition text-left">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function checkAnswer(selected) {
+            const q = quizQuestions[currentQuizIndex];
+            if (selected === q.ans) {
+                streak++;
+                document.getElementById('quiz-streak').innerText = `${streak} 🔥`;
+            } else {
+                streak = 0;
+                document.getElementById('quiz-streak').innerText = `0 🔥`;
+            }
+            currentQuizIndex++;
+            renderQuiz();
+        }
+
+        function resetQuiz() {
+            currentQuizIndex = 0;
+            streak = 0;
+            document.getElementById('quiz-streak').innerText = `0 🔥`;
+            renderQuiz();
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if(soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+            }
+        }
+    </script>
+</body>
+</html>
